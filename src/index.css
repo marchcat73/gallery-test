@@ -1,0 +1,40 @@
+html,
+body {
+  height: 100%;
+}
+
+html:not(.android-device) {
+  * {
+    text-rendering: geometricPrecision;
+  }
+}
+
+body {
+  position: relative;
+  margin: 0;
+  overflow-x: hidden;
+  font-size: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+[role='button'] {
+  outline: none;
+}
+
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+a:focus {
+  outline: none;
+  outline-offset: 0px;
+}
