@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^5.1.1",
     "@testing-library/react": "^9.4.0",
     "@testing-library/user-event": "^10.0.0",
+    "antd": "^3.26.11",
     "autoprefixer": "^9.7.4",
     "node-sass": "^4.13.1",
     "postcss-all-link-colors": "^2.0.0",
