@@ -30,10 +30,7 @@ const Gallery = () => {
   const { url, loading, error, data } = state;
 
   const onChangeHandler = e => {
-    const { name, value } = e.target;
-    const payload = { [name]: value };
-    const { url } = payload;
-    dispatch({ type: 'SET_URL', payload: url });
+    dispatch({ type: 'SET_URL', payload: e.target.value });
   };
 
   console.log(url);
@@ -43,7 +40,6 @@ const Gallery = () => {
       <div className="gallery__header">
         <form className="gallery__form">
           <Input
-            name="url"
             placeholder="Введите url файла json с данными"
             value={url}
             onChange={onChangeHandler}
