@@ -1,6 +1,9 @@
 import React, { useReducer } from 'react';
+import SimpleReactValidator from 'simple-react-validator';
 import { Input, Button } from 'antd';
 import './Gallery.scss';
+
+const validator = new SimpleReactValidator();
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -37,10 +40,11 @@ const Gallery = () => {
   const { url, loading, error, data, disabled } = state;
 
   const onChangeHandler = e => {
-    if (e.target.value !== '') {
+    if (validator.allValid()) {
       dispatch({ type: 'SET_BUTTON_DISABLED_FALSE' });
-      dispatch({ type: 'SET_URL', payload: e.target.value });
     }
+
+    dispatch({ type: 'SET_URL', payload: e.target.value });
   };
 
   const clearForm = () => {
@@ -62,6 +66,7 @@ const Gallery = () => {
             value={url}
             onChange={onChangeHandler}
           />
+          {validator.message('url', url, 'required|url')}
           <Button type="primary" htmlType="submit" disabled={disabled}>
             Submit
           </Button>
