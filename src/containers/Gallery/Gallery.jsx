@@ -6,6 +6,12 @@ const reducer = (state, action) => {
   switch (action.type) {
     case 'SET_URL':
       return { ...state, url: action.payload };
+    case 'SET_BUTTON_DISABLED_FALSE':
+      return { ...state, disabled: false };
+    case 'SET_BUTTON_DISABLED_TRUE':
+      return { ...state, disabled: true };
+    case 'CLEAR_FORM':
+      return { ...state, url: '' };
     case 'FETCH':
       return { ...state, loading: true };
     case 'FETCH_SUCCESS':
@@ -22,29 +28,46 @@ const Gallery = () => {
     loading: false,
     error: false,
     data: [],
-    url: ''
+    url: '',
+    disabled: true
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { url, loading, error, data } = state;
+  const { url, loading, error, data, disabled } = state;
 
   const onChangeHandler = e => {
-    dispatch({ type: 'SET_URL', payload: e.target.value });
+    if (e.target.value !== '') {
+      dispatch({ type: 'SET_BUTTON_DISABLED_FALSE' });
+      dispatch({ type: 'SET_URL', payload: e.target.value });
+    }
   };
 
-  console.log(url);
+  const clearForm = () => {
+    dispatch({ type: 'CLEAR_FORM' });
+    dispatch({ type: 'SET_BUTTON_DISABLED_TRUE' });
+  };
+
+  const onSubmitHandler = e => {
+    e.preventDefault();
+    console.log(url);
+  };
 
   return (
     <div className="gallery">
       <div className="gallery__header">
-        <form className="gallery__form">
+        <form className="gallery__form" onSubmit={onSubmitHandler}>
           <Input
             placeholder="Введите url файла json с данными"
             value={url}
             onChange={onChangeHandler}
           />
-          <Button type="primary">Submit</Button>
+          <Button type="primary" htmlType="submit" disabled={disabled}>
+            Submit
+          </Button>
+          <Button type="primary" onClick={clearForm}>
+            Clear
+          </Button>
         </form>
       </div>
     </div>
