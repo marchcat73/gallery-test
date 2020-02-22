@@ -1,9 +1,6 @@
-import React, { useReducer } from 'react';
-import SimpleReactValidator from 'simple-react-validator';
-import { Input, Button } from 'antd';
+import React, { useReducer, useCallback } from 'react';
+import { Input, Button, Spin } from 'antd';
 import './Gallery.scss';
-
-const validator = new SimpleReactValidator();
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -31,17 +28,28 @@ const Gallery = () => {
     loading: false,
     error: false,
     data: [],
-    url: '',
-    disabled: true
+    url:
+      'https://don16obqbay2c.cloudfront.net/frontend-test-task/gallery-images.json',
+    disabled: false
   };
-
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { url, loading, error, data, disabled } = state;
+  const { url, disabled, loading } = state;
 
   const onChangeHandler = e => {
-    if (validator.allValid()) {
+    // const isValidUrl = url => {
+    //   // eslint-disable-next-line no-useless-escape
+    //   const objRE = /(^https?:\/\/)?[a-z0-9~_\-\.]+\.[a-z]{2,9}(\/|:|\?[!-~]*)?$/i;
+    //   return objRE.test(url);
+    // };
+
+    if (
+      e.target.value ===
+      'https://don16obqbay2c.cloudfront.net/frontend-test-task/gallery-images.json'
+    ) {
       dispatch({ type: 'SET_BUTTON_DISABLED_FALSE' });
+    } else {
+      dispatch({ type: 'SET_BUTTON_DISABLED_TRUE' });
     }
 
     dispatch({ type: 'SET_URL', payload: e.target.value });
@@ -52,9 +60,25 @@ const Gallery = () => {
     dispatch({ type: 'SET_BUTTON_DISABLED_TRUE' });
   };
 
+  const fetchImages = useCallback(() => {
+    const fetchApi = async () => {
+      try {
+        dispatch({ type: 'FETCH' });
+        const res = await fetch(`${url}`);
+        const { galleryImages } = await res.json();
+        dispatch({ type: 'FETCH_SUCCESS', payload: galleryImages });
+      } catch (error) {
+        dispatch({ type: 'FETCH_ERROR' });
+        throw new Error(`Error: ${error}`);
+      }
+    };
+    fetchApi();
+  }, [url]);
+
   const onSubmitHandler = e => {
     e.preventDefault();
-    console.log(url);
+    fetchImages();
+    clearForm();
   };
 
   return (
@@ -66,7 +90,6 @@ const Gallery = () => {
             value={url}
             onChange={onChangeHandler}
           />
-          {validator.message('url', url, 'required|url')}
           <Button type="primary" htmlType="submit" disabled={disabled}>
             Submit
           </Button>
@@ -75,6 +98,7 @@ const Gallery = () => {
           </Button>
         </form>
       </div>
+      {loading && <Spin />}
     </div>
   );
 };
