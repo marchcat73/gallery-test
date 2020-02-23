@@ -1,4 +1,5 @@
-import React, { useReducer, useCallback } from 'react';
+import React, { useReducer, useCallback, useLayoutEffect, useRef } from 'react';
+import ResizeObserver from 'resize-observer-polyfill';
 import { Input, Button, Spin } from 'antd';
 import './Gallery.scss';
 
@@ -18,6 +19,8 @@ const reducer = (state, action) => {
       return { ...state, data: action.payload, loading: false, error: false };
     case 'FETCH_ERROR':
       return { ...state, loading: false, error: true };
+    case 'SET_CONTENT_WIDTH':
+      return { ...state, contentWidth: action.payload };
     default:
       throw new Error();
   }
@@ -30,11 +33,14 @@ const Gallery = () => {
     data: [],
     url:
       'https://don16obqbay2c.cloudfront.net/frontend-test-task/gallery-images.json',
-    disabled: false
+    disabled: false,
+    contentWidth: 0
   };
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { url, disabled, loading } = state;
+  const { url, disabled, loading, contentWidth } = state;
+
+  const contentRef = useRef(null);
 
   const onChangeHandler = e => {
     // const isValidUrl = url => {
@@ -81,6 +87,31 @@ const Gallery = () => {
     clearForm();
   };
 
+  useLayoutEffect(() => {
+    let animationFrameID = null;
+    const observer = new ResizeObserver(entries => {
+      const newWidth = entries[0].contentRect.width;
+      if (contentWidth !== newWidth) {
+        // put in an animation frame to stop "benign errors" from
+        // ResizObserver https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+        animationFrameID = window.requestAnimationFrame(() => {
+          dispatch({
+            type: 'SET_CONTENT_WIDTH',
+            payload: Math.floor(newWidth)
+          });
+        });
+      }
+    });
+
+    observer.observe(contentRef.current);
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(animationFrameID);
+    };
+  });
+
+  console.log(loading);
+
   return (
     <div className="gallery">
       <div className="gallery__header">
@@ -98,7 +129,19 @@ const Gallery = () => {
           </Button>
         </form>
       </div>
-      {loading && <Spin />}
+      {!contentWidth ? (
+        <div className="gallery__content" ref={contentRef}>
+          &nbsp;
+        </div>
+      ) : (
+        <div className="gallery__content" ref={contentRef}>
+          {loading && (
+            <div className="gallery__spinner">
+              <Spin />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
