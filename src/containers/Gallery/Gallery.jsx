@@ -1,6 +1,7 @@
 import React, { useReducer, useCallback, useLayoutEffect, useRef } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { Input, Button, Spin } from 'antd';
+import { computeRowLayout } from '../../utils/justified';
 import './Gallery.scss';
 
 const reducer = (state, action) => {
@@ -38,11 +39,12 @@ const Gallery = () => {
   };
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { url, disabled, loading, contentWidth } = state;
+  const { url, disabled, loading, contentWidth, data } = state;
 
   const contentRef = useRef(null);
 
   const onChangeHandler = e => {
+    /** Валидация, если понадобиться */
     // const isValidUrl = url => {
     //   // eslint-disable-next-line no-useless-escape
     //   const objRE = /(^https?:\/\/)?[a-z0-9~_\-\.]+\.[a-z]{2,9}(\/|:|\?[!-~]*)?$/i;
@@ -92,8 +94,6 @@ const Gallery = () => {
     const observer = new ResizeObserver(entries => {
       const newWidth = entries[0].contentRect.width;
       if (contentWidth !== newWidth) {
-        // put in an animation frame to stop "benign errors" from
-        // ResizObserver https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
         animationFrameID = window.requestAnimationFrame(() => {
           dispatch({
             type: 'SET_CONTENT_WIDTH',
@@ -110,11 +110,39 @@ const Gallery = () => {
     };
   });
 
-  console.log(loading);
+  const limitNodeSearch = 2;
+  const targetRowHeight = 200;
+  const margin = 2;
+
+  const thumbs = computeRowLayout({
+    contentWidth,
+    limitNodeSearch,
+    targetRowHeight,
+    margin,
+    photos: data
+  });
+
+  const renderPhoto = thumbs.map((thumb, index) => {
+    const { url, width, heigt } = thumb;
+    return (
+      <img
+        key={`key-img-${url}-${index}`}
+        src={url}
+        alt="3"
+        width={width}
+        height={heigt}
+        className="gallery__photo"
+      />
+    );
+  });
 
   return (
     <div className="gallery">
       <div className="gallery__header">
+        <p>
+          Введите
+          https://don16obqbay2c.cloudfront.net/frontend-test-task/gallery-images.json
+        </p>
         <form className="gallery__form" onSubmit={onSubmitHandler}>
           <Input
             placeholder="Введите url файла json с данными"
@@ -140,6 +168,7 @@ const Gallery = () => {
               <Spin />
             </div>
           )}
+          {renderPhoto}
         </div>
       )}
     </div>
